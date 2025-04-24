@@ -28,7 +28,6 @@ const GetMenuQuery = {
   `,
 };
 
-
 interface MenuItem {
   title: string;
   url: string;
@@ -58,9 +57,17 @@ function mapToSiteNavigationElement(
 }
 
 interface Props {
+  /**
+   * @title Menu Handle
+   * @description Unique identifier of the menu in Shopify. Use it to fetch the navigation items (e.g., "main-menu" or "footer-menu").
+   */
   handle: string;
 }
 
+/**
+ * @title Shopify Integration
+ * @description Get Menu navigation loader
+ */
 async function loader(
   props: Props,
   _req: Request,
@@ -76,7 +83,9 @@ async function loader(
     ...GetMenuQuery,
   });
 
-  const navigationItems = data.menu.items.map(mapToSiteNavigationElement);
+  const navigationItems = data?.menu?.items
+    ? data?.menu?.items?.map(mapToSiteNavigationElement)
+    : [];
 
   return navigationItems;
 }
