@@ -44,12 +44,18 @@ interface MenuQueryResponse {
 interface MenuQueryVariables {
   handle: string;
 }
+
+function normalizePath(path?: string, fallback = "/"): string {
+  if (!path) return fallback;
+  return path.endsWith("/") ? path : `${path}/`;
+}
+
 function rewriteShopifyUrl(
   shopifyUrl: string,
   slugs: {
-    productPageSlug: string;
-    categoryPageSlug: string;
-    singlePageSlug: string;
+    productPagePath: string;
+    categoryPagePath: string;
+    singlePagePath: string;
   },
 ): string {
   try {
@@ -58,11 +64,11 @@ function rewriteShopifyUrl(
 
     switch (first) {
       case "products":
-        return `/${slugs.productPageSlug}/${second}`;
+        return `${slugs.productPagePath}${second}`;
       case "collections":
-        return `/${slugs.categoryPageSlug}/${second}`;
+        return `${slugs.categoryPagePath}${second}`;
       case "pages":
-        return `/${slugs.singlePageSlug}/${second}`;
+        return `${slugs.singlePagePath}${second}`;
       default:
         return url.pathname; // Keep original if it doesn't match
     }
@@ -74,9 +80,9 @@ function rewriteShopifyUrl(
 function mapToSiteNavigationElement(
   item: MenuItem,
   slugs: {
-    productPageSlug: string;
-    categoryPageSlug: string;
-    singlePageSlug: string;
+    productPagePath: string;
+    categoryPagePath: string;
+    singlePagePath: string;
   },
 ): SiteNavigationElement {
   return {
@@ -98,21 +104,21 @@ interface Props {
 
   /**
    * @title Product Page Slug
-   * @description Custom path for product pages. For example, "/product" will transform "/products/rubiks-cube" into "/product/rubiks-cube".
+   * @description Custom path for product pages. For example, "/product/" will transform "/products/rubiks-cube" into "/product/rubiks-cube".
    */
-  productPageSlug?: string;
+  productPagePath?: string;
 
   /**
    * @title Category Page Slug
-   * @description Custom path for collection/category pages. For example, "/category" will transform "/collections/building-blocks" into "/category/building-blocks".
+   * @description Custom path for collection/category pages. For example, "/category/" will transform "/collections/building-blocks" into "/category/building-blocks".
    */
-  categoryPageSlug?: string;
+  categoryPagePath?: string;
 
   /**
    * @title Single Page Slug
-   * @description Custom path for individual or static pages. For example, "/page" will transform "/pages/about-us" into "/page/about-us".
+   * @description Custom path for individual or static pages. For example, "/page/" will transform "/pages/about-us" into "/page/about-us".
    */
-  singlePageSlug?: string;
+  singlePagePath?: string;
 }
 
 /**
@@ -137,9 +143,9 @@ async function loader(
   const navigationItems = data?.menu?.items
     ? data?.menu?.items?.map((item: MenuItem) =>
       mapToSiteNavigationElement(item, {
-        productPageSlug: props.productPageSlug ?? "product",
-        categoryPageSlug: props.categoryPageSlug ?? "category",
-        singlePageSlug: props.singlePageSlug ?? "page",
+        productPagePath: normalizePath(props.productPagePath, "/product/"),
+        categoryPagePath: normalizePath(props.categoryPagePath, "/category/"),
+        singlePagePath: normalizePath(props.singlePagePath, "/page/"),
       })
     )
     : [];
