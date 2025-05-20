@@ -50,18 +50,18 @@ function rewriteShopifyUrl(
     productPageSlug: string;
     categoryPageSlug: string;
     singlePageSlug: string;
-  }
+  },
 ): string {
   try {
     const url = new URL(shopifyUrl);
-    const [first, second] = url.pathname.split('/').filter(Boolean);
+    const [first, second] = url.pathname.split("/").filter(Boolean);
 
     switch (first) {
-      case 'products':
+      case "products":
         return `/${slugs.productPageSlug}/${second}`;
-      case 'collections':
+      case "collections":
         return `/${slugs.categoryPageSlug}/${second}`;
-      case 'pages':
+      case "pages":
         return `/${slugs.singlePageSlug}/${second}`;
       default:
         return url.pathname; // Keep original if it doesn't match
@@ -77,13 +77,15 @@ function mapToSiteNavigationElement(
     productPageSlug: string;
     categoryPageSlug: string;
     singlePageSlug: string;
-  }
+  },
 ): SiteNavigationElement {
   return {
     "@type": "SiteNavigationElement",
     name: item.title,
     url: rewriteShopifyUrl(item.url, slugs),
-    children: item.items?.map((child) => mapToSiteNavigationElement(child, slugs)),
+    children: item.items?.map((child) =>
+      mapToSiteNavigationElement(child, slugs)
+    ),
   };
 }
 
@@ -133,11 +135,13 @@ async function loader(
   });
 
   const navigationItems = data?.menu?.items
-    ? data?.menu?.items?.map((item: MenuItem) => mapToSiteNavigationElement(item, {
-      productPageSlug: props.productPageSlug ?? 'product',
-      categoryPageSlug: props.categoryPageSlug ?? 'category',
-      singlePageSlug: props.singlePageSlug ?? 'page',
-    }))
+    ? data?.menu?.items?.map((item: MenuItem) =>
+      mapToSiteNavigationElement(item, {
+        productPageSlug: props.productPageSlug ?? "product",
+        categoryPageSlug: props.categoryPageSlug ?? "category",
+        singlePageSlug: props.singlePageSlug ?? "page",
+      })
+    )
     : [];
 
   return navigationItems;
